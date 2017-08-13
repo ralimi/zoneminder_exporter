@@ -3,6 +3,7 @@
 *.dll
 *.so
 *.dylib
+zoneminder_exporter
 
 # Test binary, build with `go test -c`
 *.test

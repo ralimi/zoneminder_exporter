@@ -5,6 +5,9 @@
 *.dylib
 zoneminder_exporter
 
+# VIM swap files
+*.swp
+
 # Test binary, build with `go test -c`
 *.test
 

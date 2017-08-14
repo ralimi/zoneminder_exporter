@@ -6,6 +6,7 @@ import (
 	"net/http"
 	_ "net/http/pprof"
 	"os"
+	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -28,6 +29,14 @@ var (
 		"web.telemetry-path", "/metrics",
 		"Path under which to expose metrics.",
 	)
+	zmApiUrl = flag.String(
+		"zoneminder.zm-api-url", "http://localhost/zm/api",
+		"URL to the ZoneMinder API",
+	)
+	collectTimeout = flag.Duration(
+		"zoneminder.collect-timeout", 30*time.Second,
+		"Timeout for a single collection",
+	)
 )
 
 const (
@@ -49,7 +58,7 @@ func main() {
 	log.Infoln("Starting zoneminder_exporter", version.Info())
 	log.Infoln("Build context", version.BuildContext())
 
-	exp := exporter.NewExporter()
+	exp := exporter.New(*zmApiUrl, *collectTimeout)
 	prometheus.MustRegister(exp)
 
 	http.Handle(*metricPath, promhttp.Handler())

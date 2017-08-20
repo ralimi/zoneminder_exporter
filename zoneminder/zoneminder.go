@@ -138,6 +138,12 @@ func (c *client) Events(ctx context.Context, minStart time.Time) ([]Event, error
 		Pagination *rspPagination
 	}
 
+	// ZoneMinder exports times in the local timezone by default.
+	loc, err := time.LoadLocation("Local")
+	if err != nil {
+		return nil, fmt.Errorf("Failed to load local timezone: %v", err)
+	}
+
 	var result []Event
 	page := 1
 	for {
@@ -169,13 +175,13 @@ func (c *client) Events(ctx context.Context, minStart time.Time) ([]Event, error
 					continue
 				}
 
-				start, err := time.Parse(timeFormat, ei.Event.StartTime)
+				start, err := time.ParseInLocation(timeFormat, ei.Event.StartTime, loc)
 				if err != nil {
 					log.Errorf("Failed to parse start time %s; skipping event: %v", ei.Event.StartTime, err)
 					continue
 				}
 
-				end, err := time.Parse(timeFormat, ei.Event.EndTime)
+				end, err := time.ParseInLocation(timeFormat, ei.Event.EndTime, loc)
 				if err != nil {
 					log.Errorf("Failed to parse end time %s; skipping event: %v", ei.Event.EndTime, err)
 					continue
@@ -190,8 +196,8 @@ func (c *client) Events(ctx context.Context, minStart time.Time) ([]Event, error
 				result = append(result, Event{
 					Id:      ei.Event.Id,
 					Name:    ei.Event.Name,
-					Start:   start.Local(),
-					End:     end.Local(),
+					Start:   start,
+					End:     end,
 					Monitor: monitor,
 				})
 			}

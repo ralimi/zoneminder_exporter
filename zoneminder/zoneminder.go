@@ -190,8 +190,8 @@ func (c *client) Events(ctx context.Context, minStart time.Time) ([]Event, error
 				result = append(result, Event{
 					Id:      ei.Event.Id,
 					Name:    ei.Event.Name,
-					Start:   start,
-					End:     end,
+					Start:   start.Local(),
+					End:     end.Local(),
 					Monitor: monitor,
 				})
 			}

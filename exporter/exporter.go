@@ -21,6 +21,7 @@ type Exporter struct {
 	lastEventStartTimeDesc *prometheus.Desc
 	lastEventEndTimeDesc   *prometheus.Desc
 	daemonRunningDesc      *prometheus.Desc
+	monitorConfiguredDesc  *prometheus.Desc
 }
 
 func New(zmApiUrl string, collectTimeout time.Duration) *Exporter {
@@ -45,6 +46,12 @@ func New(zmApiUrl string, collectTimeout time.Duration) *Exporter {
 			[]string{},
 			prometheus.Labels{},
 		),
+		monitorConfiguredDesc: prometheus.NewDesc(
+			"zoneminder_monitor_configured",
+			"Monitor configured in ZoneMinder",
+			[]string{"monitor"},
+			prometheus.Labels{},
+		),
 	}
 }
 
@@ -53,6 +60,7 @@ func (e *Exporter) Describe(ch chan<- *prometheus.Desc) {
 	ch <- e.lastEventStartTimeDesc
 	ch <- e.lastEventEndTimeDesc
 	ch <- e.daemonRunningDesc
+	ch <- e.monitorConfiguredDesc
 }
 
 func groupByMonitor(events []zoneminder.Event) map[string][]zoneminder.Event {
@@ -107,5 +115,19 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 		}
 	} else {
 		log.Errorf("Failed to fetch ZoneMinder events: %v", err)
+	}
+
+	// Configured monitors
+	if monitors, err := e.zmClient.Monitors(ctx); err == nil {
+		for _, m := range monitors {
+			ch <- prometheus.MustNewConstMetric(
+				e.monitorConfiguredDesc,
+				prometheus.GaugeValue,
+				float64(1),
+				m.Name,
+			)
+		}
+	} else {
+		log.Errorf("Failed to fetch ZoneMinder monitors: %v", err)
 	}
 }

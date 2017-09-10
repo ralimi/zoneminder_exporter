@@ -26,4 +26,4 @@ echo ${VERSION} > VERSION
 # Commit everything
 git add .
 git commit -m "Bump to version ${VERSION}"
-git tag -a ${VERSION} -m "Tag version ${VERSION}"
+git tag -a "v${VERSION}" -m "Tag version ${VERSION}"

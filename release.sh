@@ -6,6 +6,11 @@ set -eu
 
 readonly VERSION=$1; shift
 
+if (git tag | grep --quiet --line-regexp ${VERSION}); then
+	echo "Version ${VERSION} already exists"
+	exit 1
+fi
+
 # Ensure all tests pass
 make build test
 
@@ -16,7 +21,7 @@ govendor fetch +vendor
 make build test
 
 # Write new version
-cat ${VERSION} > VERSION
+echo ${VERSION} > VERSION
 
 # Commit everything
 git add .

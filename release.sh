@@ -5,8 +5,9 @@ cd $(dirname $0)
 set -eu
 
 readonly VERSION=$1; shift
+readonly TAG=v${VERSION}
 
-if (git tag | grep --quiet --line-regexp ${VERSION}); then
+if (git tag | grep --quiet --line-regexp "${TAG}"); then
 	echo "Version ${VERSION} already exists"
 	exit 1
 fi
@@ -26,5 +27,5 @@ echo ${VERSION} > VERSION
 # Commit everything
 git add .
 git commit -m "Bump to version ${VERSION}"
-git tag -a "v${VERSION}" -m "Tag version ${VERSION}"
+git tag -a "${TAG}" -m "Tag version ${VERSION}"
 git push --tags
